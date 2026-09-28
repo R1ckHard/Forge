@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Forge — Smithy animations</title>
+  <style>
+    :root {
+      --bg: #f2f7f5;
+      --card: #ffffff;
+      --text: #1a2e28;
+      --muted: #5c746a;
+      --accent: #1f8a70;
+      --line: #c9ded4;
+      --ember: #ff7a45;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 90% -10%, #d8ebe3 0%, transparent 45%),
+        radial-gradient(circle at 0% 100%, #ffe4d6 0%, transparent 40%),
+        var(--bg);
+      color: var(--text);
+      padding: 32px 20px 48px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: -0.5px;
+    }
+
+    .sub {
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      max-width: 960px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 8px 24px rgba(26, 46, 40, 0.06);
+    }
+
+    .stage {
+      width: 180px;
+      height: 180px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 12px;
+    }
+
+    .stage img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: auto;
+    }
+
+    .mood {
+      font-weight: 800;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .badge {
+      margin-top: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: #d3efe6;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .controls {
+      max-width: 960px;
+      margin: 0 0 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover { border-color: var(--accent); color: var(--accent); }
+
+    .speed {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input[type="range"] { accent-color: var(--accent); width: 140px; }
+  </style>
+</head>
+<body>
+  <h1>Smithy — анимации</h1>
+  <p class="sub">Покадровые PNG. В приложении анимация только на событиях; на экранах — статика (кадр 1).</p>
+
+  <div class="controls">
+    <button type="button" id="pauseBtn">Pause all</button>
+    <button type="button" id="playBtn">Play all</button>
+    <label class="speed">
+      Скорость
+      <input id="speed" type="range" min="0.4" max="2" step="0.1" value="1" />
+      <span id="speedVal">1.0×</span>
+    </label>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const ANIMATIONS = [
+      {
+        mood: 'idle',
+        label: 'Idle',
+        where: 'Auth, Plan, empty chat',
+        ms: 500,
+        frames: ['smithy-idle-1.png', 'smithy-idle-2.png'],
+      },
+      {
+        mood: 'charging',
+        label: 'Charging / Work',
+        where: 'Splash, loading, complete, paywall',
+        ms: 280,
+        frames: ['smithy-work-1.png', 'smithy-work-2.png', 'smithy-work-3.png'],
+      },
+      {
+        mood: 'thinking',
+        label: 'Thinking',
+        where: 'Coach waiting for reply',
+        ms: 450,
+        frames: ['smithy-think-1.png', 'smithy-think-2.png'],
+      },
+      {
+        mood: 'celebrate',
+        label: 'Celebrate',
+        where: 'Plan done, premium, splash end',
+        ms: 320,
+        frames: ['smithy-celebrate-1.png', 'smithy-celebrate-2.png'],
+      },
+    ];
+
+    const grid = document.getElementById('grid');
+    const players = [];
+    let speed = 1;
+    let paused = false;
+
+    for (const anim of ANIMATIONS) {
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="stage"><img alt="${anim.label}" /></div>
+        <div class="mood">${anim.label}</div>
+        <div class="meta">${anim.frames.length} frames · base ${anim.ms}ms<br/>${anim.where}</div>
+        <div class="badge">${anim.mood}</div>
+      `;
+      grid.appendChild(card);
+
+      const img = card.querySelector('img');
+      let i = 0;
+      img.src = anim.frames[0] + '?v=2';
+
+      const player = {
+        tick() {
+          if (paused) return;
+          i = (i + 1) % anim.frames.length;
+          img.src = anim.frames[i] + '?v=2';
+        },
+        baseMs: anim.ms,
+        timer: null,
+        restart() {
+          if (this.timer) clearInterval(this.timer);
+          this.timer = setInterval(() => this.tick(), this.baseMs / speed);
+        },
+      };
+      player.restart();
+      players.push(player);
+    }
+
+    document.getElementById('pauseBtn').onclick = () => {
+      paused = true;
+    };
+    document.getElementById('playBtn').onclick = () => {
+      paused = false;
+    };
+
+    const speedInput = document.getElementById('speed');
+    const speedVal = document.getElementById('speedVal');
+    speedInput.oninput = () => {
+      speed = Number(speedInput.value);
+      speedVal.textContent = speed.toFixed(1) + '×';
+      players.forEach((p) => p.restart());
+    };
+  </script>
+</body>
+</html>

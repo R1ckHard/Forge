@@ -65,18 +65,5 @@ Debug dump (local): [http://127.0.0.1:4040/debug/db](http://127.0.0.1:4040/debug
 
 ## Loom
 
-_[Добавь ссылку на Loom после записи]_
+`https://www.loom.com/share/9c9bb2c47a0141dc93b17088fbfddd4d`
 
-`https://www.loom.com/share/YOUR_VIDEO_ID`
-
----
-
-## Scope
-
-| В scope | Вне scope |
-|---------|-----------|
-| Email/password, JWT, SecureStore | Cognito / Apple / Google |
-| Plan unlock **только на сервере** | App Store / Play / IAP |
-| Coach fake API + mock paywall 1h | Реальный OpenAI |
-| In-memory persistence (demo) | Docker / MongoDB |
-| Smithy, лого, session workouts | Marketing landing |
