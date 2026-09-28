@@ -1,0 +1,10 @@
+{
+  "name": "forge",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Forge — private training companion (auth → plan → coach)",
+  "scripts": {
+    "api": "npm run dev --prefix apps/api",
+    "mobile": "npm start --prefix apps/mobile"
+  }
+}
