@@ -65,5 +65,4 @@ Debug dump (local): [http://127.0.0.1:4040/debug/db](http://127.0.0.1:4040/debug
 
 ## Loom
 
-`https://www.loom.com/share/9c9bb2c47a0141dc93b17088fbfddd4d`
-
+[Loom](https://www.loom.com/share/9c9bb2c47a0141dc93b17088fbfddd4d)
